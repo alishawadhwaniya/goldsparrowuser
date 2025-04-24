@@ -72,7 +72,11 @@ interface Packet {
   created_at: string;
   updated_at: string;
   submitter_name: string;
-  images?: string[];
+  images?: string[] | any;
+  images_data?: {
+    cloudinaryId: string;
+    cloudinaryUrl: string;
+  }[];
 }
 
 interface UploadResponse {
@@ -487,15 +491,31 @@ const PacketList = ({ viewMode, searchTerm, showHistory = false, dateFrom, dateT
                           <div>
                             <h4 className="text-sm font-semibold mb-2">Images</h4>
                             <div className="grid grid-cols-2 gap-2">
-                              {packets.find(p => p.id === packet.id)?.images?.map((image, index) => (
-                                <div key={index} className="border rounded-md overflow-hidden">
-                                  <img
-                                    src={image}
-                                    alt={`Gold packet ${index + 1}`}
-                                    className="w-full h-24 object-cover"
-                                  />
+                              {packet.images_data && Array.isArray(packet.images_data) ? (
+                                packet.images_data.map((image, index) => (
+                                  <div key={index} className="border rounded-md overflow-hidden">
+                                    <img
+                                      src={image.cloudinaryUrl}
+                                      alt={`Gold packet ${index + 1}`}
+                                      className="w-full h-24 object-cover"
+                                    />
+                                  </div>
+                                ))
+                              ) : packet.images && Array.isArray(packet.images) ? (
+                                packet.images.map((image, index) => (
+                                  <div key={index} className="border rounded-md overflow-hidden">
+                                    <img
+                                      src={typeof image === 'string' ? image : image.cloudinaryUrl || ''}
+                                      alt={`Gold packet ${index + 1}`}
+                                      className="w-full h-24 object-cover"
+                                    />
+                                  </div>
+                                ))
+                              ) : (
+                                <div className="col-span-2 text-center py-2 text-gray-500 text-sm">
+                                  No images available
                                 </div>
-                              ))}
+                              )}
                             </div>
 
                             {packet.status === "approved" && !showHistory && (
